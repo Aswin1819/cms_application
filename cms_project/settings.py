@@ -29,6 +29,9 @@ DEBUG = config('DEBUG',default=True,cast=bool)
 
 ALLOWED_HOSTS = ['*'] if DEBUG else config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
+AUTH_USER_MODEL = 'authentication.CustomUser'
+
+
 
 
 # Application definition
@@ -42,7 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders'
+    'corsheaders',
+    'authentication',
+    'cloudinary',
+    'cloudinary_storage'
 ]
 
 MIDDLEWARE = [
@@ -144,4 +150,12 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUD_NAME'),
+    'API_KEY': config('API_KEY'),
+    'API_SECRET': config('API_SECRET'),
 }
