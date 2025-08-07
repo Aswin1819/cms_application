@@ -1,6 +1,14 @@
+import re
 from rest_framework import serializers
 from .models import CustomUser
-import re
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import AuthenticationFailed
+from django.contrib.auth import authenticate
+from django.utils.translation import gettext_lazy as _
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class RegisterUserSerialzier(serializers.ModelSerializer):
     
@@ -40,4 +48,38 @@ class RegisterUserSerialzier(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+    
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    # username_field = CustomUser.USERNAME_FIELD
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.fields['email'] = self.fields.pop('username')
+    
+    def validate(self, attrs):
+        email_or_username = attrs.get('email') or attrs.get('username')
+        password = attrs.get('password')
         
+        user = authenticate(username=email_or_username,password=password)
+        
+        if user is None:
+            raise AuthenticationFailed(_('Invalid Credentials'),code='invalid_credentials')
+        
+        if not user.is_active:
+            raise AuthenticationFailed(_('This account has been deactivated by admin'),code='inactive')
+        
+        self.user = user
+        
+        data = super().validate(attrs)
+        return data
+    
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=CustomUser
+        fields = ['id', 'email', 'username','bio','profile_image',
+                  'is_verified', 'date_joined', 'updated_at', 'is_active', 'is_superuser']
+        read_only_fields = ['id','email','is_verified', 'date_joined', 'updated_at']
+        
+    
+    
