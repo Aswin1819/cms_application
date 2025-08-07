@@ -90,4 +90,3 @@ class UserProfileView(APIView):
         logger.error('error on user profile patch')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-        
