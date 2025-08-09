@@ -62,10 +62,9 @@ class BlogPostLikeView(APIView):
 
 class BlogPostDislikeView(APIView):
     permission_classes = [IsAuthenticated]
-    
-    def post(self, requuest, pk):
-        post = get_object_or_404(BlogPost, pk=pk, status='Published')
-        user = requuest.user
+    def post(self, request, pk):
+        post = get_object_or_404(BlogPost, pk=pk, status='published')
+        user = request.user
         
         if user in post.dislikes.all():
             post.dislikes.remove(user)
